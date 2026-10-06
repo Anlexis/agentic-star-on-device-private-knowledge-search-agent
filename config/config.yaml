@@ -1,0 +1,19 @@
+# Runtime parameters — loaded by the registry and passed as Graph(config=...).
+# Separate from config/agent.yaml (the static manifest, which carries identity
+# and compile-time requirements only).
+#
+# The search block is forwarded to the inner workflow graph and seeded into its
+# state, because node execute() methods take no config argument — state seeding
+# is the only route a runtime value can travel into a domain node.
+
+max_retry: 3
+timeout_s: 30
+
+search:
+  # Documents returned when the caller does not send top_k. Read by the search
+  # step; a caller may set its own value between 1 and 20.
+  top_k: 5
+  # Relevance floor applied when the caller does not send min_score: the
+  # fraction of the query's search terms a document must contain to be
+  # returned (0 to 1). Read by the search step.
+  min_score: 0.2

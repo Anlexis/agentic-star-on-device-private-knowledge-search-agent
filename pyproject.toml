@@ -1,0 +1,55 @@
+[project]
+name = "ret-c2-178"
+version = "0.1.0"
+description = "RetailPrivateKBSearchAgent — an AgentCore template"
+requires-python = ">=3.11"
+# agenticstar-agentcore is not resolvable from the default index — it is
+# installed from the package registry by the build pipeline. Pinning it here
+# would make `pip install -e .` fail.
+# pyyaml is a real runtime dependency: the human-review propagation boundary
+# test reads config/config.yaml with it. The pin matches the framework's own.
+dependencies = [
+    "agenticstar-agentcore[marketplace,openai]==1.0.3",
+    "pyyaml==6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.0.3",
+    "pytest-cov==5.0.0",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.4.4",
+    "mypy==1.10.0",
+    "types-PyYAML==6.0.12.20260815",
+]
+
+[build-system]
+requires = ["setuptools==68.2.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+# The framework wheel ships no type information, so every symbol imported from
+# it resolves to Any. Without these two settings strict mode rejects the
+# template's own correct code for the wheel's missing annotations.
+disallow_subclassing_any = false
+# Published sample code is excluded rather than annotated: it is illustrative
+# material for the next template author and is not edited by this repo.
+exclude = "src/examples/"
+
+[[tool.mypy.overrides]]
+module = ["framework.*", "shared.*", "langgraph.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# The state base class resolves to Any through the untyped wheel, so every
+# field of a subclass fails the valid-type check for that one reason. The
+# individual field errors are all the same cause and are not worth chasing
+# separately.
+module = ["src.schemas.state"]
+disable_error_code = ["valid-type"]
